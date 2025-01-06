@@ -148,6 +148,33 @@ app.get('/file/:id', (req, res) => {
         res.status(404).json({ message: 'File not found' });
     });
 });
+// @route POST /login
+// @desc  Validate key and return user details if key exists
+app.post('/login', async (req, res) => {
+    try {
+        const { key } = req.body; // Get the key from the request body
+
+        if (!key) {
+            return res.status(400).json({ message: 'Key is required' });
+        }
+
+        // Query the User collection to check if the key exists
+        const user = await conn.db.collection('user').findOne({ key });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Invalid key. User not found.' });
+        }
+
+        // Return the key and username to the frontend
+        res.json({
+            message: 'Login successful',
+            username: user.username,
+        });
+    } catch (err) {
+        console.error('Error during login:', err);
+        res.status(500).json({ message: 'Server error during login.', error: err });
+    }
+});
 
 
 
