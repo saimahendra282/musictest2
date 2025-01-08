@@ -10,7 +10,7 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-    origin: ['http://localhost:5173', 'https://saimusic.netlify.app'], // Allow requests only from these two origins
+    origin: ['http://localhost:5173', 'https://saimusicv0.netlify.app/'], // Allow requests only from these two origins
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Allowed HTTP methods
     credentials: true // Allow credentials (e.g., cookies, authorization headers)
 };
@@ -26,8 +26,8 @@ mongoose
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((err) => console.log('MongoDB connection error:', err));
+    .then(() => console.log('MongoDB ki connect ayyindhi'))
+    .catch((err) => console.log('MongoDB connection error mama:', err));
 
 const conn = mongoose.connection;
 
@@ -37,7 +37,7 @@ conn.once('open', () => {
     gridfsBucket = new GridFSBucket(conn.db, {
         bucketName: 'uploads',
     });
-    console.log('GridFS initialized successfully.');
+    console.log('GridFS successfully ga initialize ayyindhi.');
 });
 
 
@@ -54,7 +54,7 @@ app.post('/upload', async (req, res) => {
         const { name, pic, audio } = req.body;
 
         if (!pic || !audio) {
-            return res.status(400).json({ message: 'Please upload both an image and an MP3 file.' });
+            return res.status(400).json({ message: 'I WANT BOTH MP3 AND IMG FILES IDIOT.' });
         }
 
         // Decode the base64-encoded files
@@ -88,7 +88,7 @@ app.post('/upload', async (req, res) => {
         const savedMusic = await newMusic.save();
 
         res.json({
-            message: 'Files uploaded and metadata saved successfully!',
+            message: 'Hmm success bro! DB Loki upload chesesa',
             music: savedMusic,
         });
     } catch (err) {
@@ -168,7 +168,7 @@ app.post('/login', async (req, res) => {
 
         // Return the key and username to the frontend
         res.json({
-            message: 'Login successful',
+            message: 'Login Ok, Welcome',
             username: user.username,
         });
     } catch (err) {
