@@ -10,10 +10,11 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-    origin: '*', // Allow requests from any origin
-    methods: ['GET', 'POST','PUT','PATCH','DELETE'],
-    credentials: true
+    origin: ['http://localhost:5173', 'https://saimusic.netlify.app'], // Allow requests only from these two origins
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Allowed HTTP methods
+    credentials: true // Allow credentials (e.g., cookies, authorization headers)
 };
+
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 
