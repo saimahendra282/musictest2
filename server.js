@@ -9,12 +9,16 @@ const Music = require('./models/Music'); // Import the updated Music model
 const app = express();
 
 // Middleware
+// const corsOptions = {
+//     origin: ['http://localhost:5173','https://saimusicv.netlify.app/'], // Allow requests only from these two origins
+//     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Allowed HTTP methods
+//     credentials: true // Allow credentials (e.g., cookies, authorization headers)
+// };
 const corsOptions = {
-    origin: ['http://localhost:5173','https://saimusicv.netlify.app/'], // Allow requests only from these two origins
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Allowed HTTP methods
-    credentials: true // Allow credentials (e.g., cookies, authorization headers)
+    origin: '*', // Allow requests from any origin
+    methods: ['GET', 'POST','PUT','PATCH','DELETE'],
+    credentials: true
 };
-
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 
