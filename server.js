@@ -10,7 +10,7 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-    origin: ['http://localhost:5173','https://saimusicv0.netlify.app/'], // Allow requests only from these two origins
+    origin: ['http://localhost:5173','https://saimusicv.netlify.app/'], // Allow requests only from these two origins
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Allowed HTTP methods
     credentials: true // Allow credentials (e.g., cookies, authorization headers)
 };
