@@ -20,7 +20,7 @@ const corsOptions = {
 //     credentials: true
 // };
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json());
 
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI;
@@ -53,46 +53,39 @@ const upload = multer({ storage });
 
 // @route POST /upload
 // @desc  Upload an MP3 file and an image, then save metadata to the Music collection
-app.post('/upload', async (req, res) => {
+app.post('/upload', upload.fields([{ name: 'pic' }, { name: 'audio' }]), async (req, res) => {
     try {
-        const { name, pic, audio } = req.body;
+        const { name } = req.body;
+        const { pic, audio } = req.files;
 
-        if (!pic || !audio) {
-            return res.status(400).json({ message: 'I WANT BOTH MP3 AND IMG FILES IDIOT.' });
+        if (!name || !pic || !audio) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
-        // Decode the base64-encoded files
-        const picBuffer = Buffer.from(pic.split(',')[1], 'base64'); // Remove base64 header and decode
-        const audioBuffer = Buffer.from(audio.split(',')[1], 'base64'); // Remove base64 header and decode
-
-        // Function to upload file to GridFS
-        const uploadToGridFS = (fileBuffer, filename, mimetype) => {
+        const uploadToGridFS = (file, filename, mimetype) => {
             return new Promise((resolve, reject) => {
                 const uploadStream = gridfsBucket.openUploadStream(filename, {
                     contentType: mimetype,
                 });
-                uploadStream.end(fileBuffer);
-                uploadStream.on('finish', () => {
-                    resolve(uploadStream.id);
-                });
+                uploadStream.end(file.buffer);
+                uploadStream.on('finish', () => resolve(uploadStream.id));
                 uploadStream.on('error', reject);
             });
         };
 
-        // Upload files to GridFS
-        const picId = await uploadToGridFS(picBuffer, 'pic_' + Date.now(), 'image/jpeg'); // Assume JPEG image
-        const audioId = await uploadToGridFS(audioBuffer, 'audio_' + Date.now(), 'audio/mpeg'); // Assume MP3 audio
+        const picId = await uploadToGridFS(pic[0], `pic_${Date.now()}`, pic[0].mimetype);
+        const audioId = await uploadToGridFS(audio[0], `audio_${Date.now()}`, audio[0].mimetype);
 
-        // Save metadata to Music collection
         const newMusic = new Music({
             name,
             picId,
             audioId,
         });
+
         const savedMusic = await newMusic.save();
 
         res.json({
-            message: 'Hmm success bro! DB Loki upload chesesa',
+            message: 'Music uploaded successfully',
             music: savedMusic,
         });
     } catch (err) {
@@ -100,6 +93,7 @@ app.post('/upload', async (req, res) => {
         res.status(500).json({ message: 'Error uploading files.', error: err });
     }
 });
+
 
 // @route GET /music
 // @desc  Retrieve all music metadata along with image and audio file details
