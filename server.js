@@ -101,37 +101,40 @@ app.get('/music', async (req, res) => {
     try {
         const musicList = await Music.find();
 
-        // Prepare the response with URLs to access image and audio files
         const musicData = await Promise.all(
             musicList.map(async (music) => {
                 try {
-                    // Prepare URLs for image and audio using the appropriate route
+                    const audioFile = await gridfsBucket.find({ _id: music.audioId }).toArray();
+
+                    if (audioFile.length === 0) {
+                        throw new Error('Audio file not found');
+                    }
+
                     const picUrl = `${req.protocol}://${req.get('host')}/file/${music.picId}`;
                     const audioUrl = `${req.protocol}://${req.get('host')}/file/${music.audioId}`;
+                    const size = audioFile[0].length; // File size in bytes
 
                     return {
                         _id: music._id,
                         name: music.name,
                         picUrl,
                         audioUrl,
+                        size, // Add size to the response
                     };
                 } catch (err) {
                     console.error('Error retrieving files for music:', music.name, err);
-                    return null; // Return null if there is an error with a specific file
+                    return null;
                 }
             })
         );
 
-        // Filter out any null entries (if any error occurred during file retrieval)
-        const filteredMusicData = musicData.filter(item => item !== null);
-
+        const filteredMusicData = musicData.filter((item) => item !== null);
         res.json(filteredMusicData);
     } catch (err) {
         console.error('Error retrieving music list:', err);
         res.status(500).json({ message: 'Error retrieving music list.', error: err });
     }
 });
-
 
 
  // @route GET /file/:id
@@ -174,7 +177,26 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error during login.', error: err });
     }
 });
+// @route GET /getusers
+// @desc  Retrieve all users
+app.get('/getusers', async (req, res) => {
+    try {
+        // Query the User collection to get all users
+        const users = await conn.db.collection('user').find().toArray();
 
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'No users found.' });
+        }
+
+        res.json({
+            message: 'Users retrieved successfully',
+            users, // Return all users in the response
+        });
+    } catch (err) {
+        console.error('Error retrieving users:', err);
+        res.status(500).json({ message: 'Error retrieving users.', error: err });
+    }
+});
 
 
 
